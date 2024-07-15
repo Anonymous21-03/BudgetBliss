@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/BudgetBliss/static/css/main.dc4d6ff2.css",
+    "main.js": "/BudgetBliss/static/js/main.722fe4ca.js",
+    "index.html": "/BudgetBliss/index.html",
+    "main.dc4d6ff2.css.map": "/BudgetBliss/static/css/main.dc4d6ff2.css.map",
+    "main.722fe4ca.js.map": "/BudgetBliss/static/js/main.722fe4ca.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dc4d6ff2.css",
+    "static/js/main.722fe4ca.js"
+  ]
+}
