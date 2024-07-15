@@ -85,36 +85,33 @@ import json
 @app.route('/api/user_info', methods=['GET'])
 def get_user_info():
     access_token = request.headers.get('Authorization')
+    print("Received Authorization header:", access_token)
+    
     if not access_token:
         return jsonify({'error': 'No access token provided'}), 401
     
     access_token = access_token.split(' ')[1]  # Remove 'Bearer ' prefix
+    print("Extracted access token:", access_token)
+    
     try:
         access_token = json.loads(access_token)
+        print("Parsed access token:", access_token)
+        
         sObj = Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
         sObj.setAccessToken(access_token)
         
         user = sObj.getCurrentUser()
+        print("Retrieved user info:", user)
+        
         return jsonify({
             'id': user.getId(),
             'name': f"{user.getFirstName()} {user.getLastName()}",
             'email': user.getEmail(),
             'picture': user.getPicture().getMedium() if user.getPicture() else None
         })
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        print("JSON decode error:", str(e))
         return jsonify({'error': 'Invalid access token format'}), 400
-    except Exception as e:
-        print(f"Error getting user info: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-    
-    try:
-        user = sObj.getCurrentUser()
-        return jsonify({
-            'id': user.getId(),
-            'name': f"{user.getFirstName()} {user.getLastName()}",
-            'email': user.getEmail(),
-            'picture': user.getPicture().getMedium() if user.getPicture() else None
-        })
     except Exception as e:
         print(f"Error getting user info: {str(e)}")
         return jsonify({'error': str(e)}), 500

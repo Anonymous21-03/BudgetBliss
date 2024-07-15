@@ -22,14 +22,14 @@ function Callback() {
           oauth_verifier,
           secret
         });
-
+    
         if (response.data.access_token) {
           const accessToken = JSON.stringify(response.data.access_token);
           console.log("Received access token:", accessToken);
           localStorage.setItem('access_token', accessToken);
           navigate('/dashboard');
         } else {
-          console.error("No access token in response");
+          console.error("No access token in response:", response.data);
           navigate('/');
         }
       } catch (error) {
