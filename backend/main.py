@@ -83,10 +83,8 @@ def fetch_user_data(sObj):
 def main():
     sObj = get_splitwise_instance()
     
-    # Uncomment the next line if you need to authorize the user
     access_token = authorize_user(sObj)
     
-    # If you've already got an access token, you can set it directly
     sObj.setAccessToken(access_token)
     
     fetch_user_data(sObj)
