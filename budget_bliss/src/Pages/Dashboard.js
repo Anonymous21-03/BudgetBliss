@@ -10,10 +10,10 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const access_token = localStorage.getItem('access_token');
-      console.log("Access token in Dashboard:", access_token);
+      const accessTokenString = localStorage.getItem('access_token');
+      console.log("Access token in Dashboard:", accessTokenString);
       
-      if (!access_token) {
+      if (!accessTokenString) {
         console.error('No access token found');
         setError('No access token found. Please log in again.');
         setLoading(false);
@@ -21,14 +21,16 @@ function Dashboard() {
       }
 
       try {
-        const response = await axios.post('/api/fetch_data', { access_token });
+        const accessToken = JSON.parse(accessTokenString);
+        const response = await axios.post('/api/fetch_data', { access_token: accessToken });
         console.log("Response from fetch_data:", response.data);
-        await axios.post('/api/process_expenses');
+        
+        await axios.post('/api/process_expenses', { access_token: accessToken });
         const results = await axios.get('/api/get_results');
         setData(results.data);
       } catch (error) {
-        console.error('Error fetching data:', error.response ? error.response.data : error.message);
-        setError('Error fetching data. Please try again.');
+        console.error('Error:', error.response ? error.response.data : error.message);
+        setError('An error occurred. Please try again.');
       } finally {
         setLoading(false);
       }

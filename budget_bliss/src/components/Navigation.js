@@ -8,15 +8,16 @@ function Navigation() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const access_token = localStorage.getItem('access_token');
-      if (access_token) {
+      const accessTokenString = localStorage.getItem('access_token');
+      if (accessTokenString) {
         try {
+          const accessToken = JSON.parse(accessTokenString);
           const response = await axios.get('/api/user_info', {
-            headers: { Authorization: `Bearer ${access_token}` }
+            headers: { Authorization: `Bearer ${accessToken.oauth_token}` }
           });
           setUser(response.data);
         } catch (error) {
-          console.error('Error fetching user info:', error);
+          console.error('Error fetching user info:', error.response ? error.response.data : error.message);
           if (error.response && error.response.status === 401) {
             handleLogout();
           }

@@ -24,15 +24,16 @@ function Callback() {
         });
 
         if (response.data.access_token) {
-          console.log("Received access token:", response.data.access_token);
-          localStorage.setItem('access_token', response.data.access_token);
+          const accessToken = JSON.stringify(response.data.access_token);
+          console.log("Received access token:", accessToken);
+          localStorage.setItem('access_token', accessToken);
           navigate('/dashboard');
         } else {
           console.error("No access token in response");
           navigate('/');
         }
       } catch (error) {
-        console.error('Error in callback:', error);
+        console.error('Error in callback:', error.response ? error.response.data : error.message);
         navigate('/');
       }
     };
