@@ -34,18 +34,15 @@ def fetch_user_data(sObj):
             writer.writerows(data)
         print(f"Updated {filename}")
 
-    # Update groups.csv
     group_data = [[group.getId(), group.getName(), group.getUpdatedAt()] for group in groups]
     update_csv('groups.csv', ['Group ID', 'Group Name', 'Updated At'], group_data)
 
-    # Update friends.csv
     friend_data = [[friend.getId(), friend.getFirstName(), friend.getLastName(), friend.getEmail()] for friend in friends]
     update_csv('friends.csv', ['Friend ID', 'First Name', 'Last Name', 'Email'], friend_data)
 
-    # Fetch all expenses (pagination)
     all_expenses = []
     offset = 0
-    limit = 100  # Splitwise API typically limits to 100 expenses per request
+    limit = 100  
     while True:
         expenses = sObj.getExpenses(limit=limit, offset=offset)
         if not expenses:
@@ -55,7 +52,6 @@ def fetch_user_data(sObj):
         if len(expenses) < limit:
             break
 
-    # Update expenses.csv
     expense_data = []
     for expense in all_expenses:
         created_by = "Unknown"
