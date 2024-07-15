@@ -8,7 +8,6 @@ function Login() {
       const { url, secret } = response.data;
       localStorage.setItem('secret', secret);
       
-      // Redirect to the authorization URL in the same window
       window.location.href = url;
 
     } catch (error) {
