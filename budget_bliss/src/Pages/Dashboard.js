@@ -1,26 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       const access_token = localStorage.getItem('access_token');
+      console.log("Access token in Dashboard:", access_token);
+      
+      if (!access_token) {
+        console.error('No access token found');
+        setError('No access token found. Please log in again.');
+        setLoading(false);
+        return;
+      }
+
       try {
-        await axios.post('/api/fetch_data', { access_token });
+        const response = await axios.post('/api/fetch_data', { access_token });
+        console.log("Response from fetch_data:", response.data);
         await axios.post('/api/process_expenses');
-        const response = await axios.get('/api/get_results');
-        setData(response.data);
+        const results = await axios.get('/api/get_results');
+        setData(results.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error.response ? error.response.data : error.message);
+        setError('Error fetching data. Please try again.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
-  if (!data) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!data) return <div>No data available</div>;
 
   return (
     <div>

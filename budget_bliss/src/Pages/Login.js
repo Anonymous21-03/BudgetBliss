@@ -8,17 +8,8 @@ function Login() {
       const { url, secret } = response.data;
       localStorage.setItem('secret', secret);
       
-      // Open the authorization URL in a new window
-      const authWindow = window.open(url, 'Splitwise Authorization', 'width=600,height=600');
-      
-      // Set up a timer to check if the window has been closed
-      const timer = setInterval(() => {
-        if (authWindow.closed) {
-          clearInterval(timer);
-          // Redirect to dashboard or check for successful authentication
-          window.location.href = '/dashboard';
-        }
-      }, 500);
+      // Redirect to the authorization URL in the same window
+      window.location.href = url;
 
     } catch (error) {
       console.error('Error initiating login:', error);
