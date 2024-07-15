@@ -1,0 +1,5 @@
+flask
+splitwise
+pandas
+numpy
+scikit-learn
