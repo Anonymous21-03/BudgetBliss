@@ -1,16 +1,16 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+from sklearn.pipeline import Pipeline
 
 def process_expenses():
-    import pandas as pd
-    import numpy as np
-    from sklearn.model_selection import train_test_split
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.pipeline import Pipeline
-
+    # Load the data
     data = pd.read_csv("training-data.csv")
     data2 = pd.read_csv("expenses.csv")
 
+    # Data preprocessing
     data['Description'] = data['Description'].fillna('Unknown')
     data2['Description'] = data2['Description'].fillna('Unknown')
 
@@ -48,16 +48,5 @@ def process_expenses():
     print("Predictions saved to 'prediction.csv'")
     print("Expense sums saved to 'expense_sums.csv'")
 
-    # print("\nSample predictions:")
-    # for i in range(min(10, len(X_test))):
-    #     print(f"Expense ID: {results['Expense ID'].iloc[i]}")
-    #     print(f"Description: {results['Description'].iloc[i]}")
-    #     print(f"Predicted: {results['predicted_expense_type'].iloc[i]}")
-    #     print(f"Amount: {results['Cost'].iloc[i]}")
-    #     print(f"Currency Code: {results['Currency Code'].iloc[i]}")
-    #     print(f"Date: {results['Date'].iloc[i]}")
-    #     print(f"Created By: {results['Created By'].iloc[i]}")
-    #     print()
-    
 if __name__ == "__main__":
     process_expenses()

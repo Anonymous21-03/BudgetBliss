@@ -1,10 +1,11 @@
+import pandas as pd
 from flask import Flask, jsonify, request
 from splitwise import Splitwise
 import config
 from main import fetch_user_data
 from Expense import process_expenses
 import os
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -69,13 +70,15 @@ def fetch_data():
 @app.route('/api/get_results', methods=['GET'])
 def get_results():
     try:
-        with open('prediction.csv', 'r', encoding='utf-8') as f:
-            predictions = f.read()
-        with open('expense_sums.csv', 'r', encoding='utf-8') as f:
-            expense_sums = f.read()
+        predictions = pd.read_csv('prediction.csv')
+        expense_sums = pd.read_csv('expense_sums.csv')
+        
+        predictions_json = predictions.to_json(orient='records')
+        expense_sums_json = expense_sums.to_json(orient='records')
+        
         return jsonify({
-            'predictions': predictions,
-            'expense_sums': expense_sums
+            'predictions': predictions_json,
+            'expense_sums': expense_sums_json
         })
     except Exception as e:
         print(f"Error getting results: {str(e)}")

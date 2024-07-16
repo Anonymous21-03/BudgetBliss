@@ -11,10 +11,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       const accessTokenString = localStorage.getItem('access_token');
-      console.log("Access token in Dashboard:", accessTokenString);
-      
       if (!accessTokenString) {
-        console.error('No access token found');
         setError('No access token found. Please log in again.');
         setLoading(false);
         return;
@@ -22,9 +19,7 @@ function Dashboard() {
 
       try {
         const accessToken = JSON.parse(accessTokenString);
-        const response = await axios.post('/api/fetch_data', { access_token: accessToken });
-        console.log("Response from fetch_data:", response.data);
-        
+        await axios.post('/api/fetch_data', { access_token: accessToken });
         await axios.post('/api/process_expenses', { access_token: accessToken });
         const results = await axios.get('/api/get_results');
         setData(results.data);
@@ -43,13 +38,53 @@ function Dashboard() {
   if (error) return <div>Error: {error}</div>;
   if (!data) return <div>No data available</div>;
 
+  const predictions = JSON.parse(data.predictions);
+  const expenseSums = JSON.parse(data.expense_sums);
+
+  // Limit the number of predictions to display
+  const displayedPredictions = predictions.slice(0, 10);
+
   return (
     <div>
       <h2>Your Splitwise Dashboard</h2>
-      <h3>Expense Predictions</h3>
-      <pre>{data.predictions}</pre>
-      <h3>Expense Sums</h3>
-      <pre>{data.expense_sums}</pre>
+      
+      <h3>Recent Expense Predictions</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Cost</th>
+            <th>Predicted Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {displayedPredictions.map((prediction, index) => (
+            <tr key={index}>
+              <td>{prediction.Description}</td>
+              <td>{prediction.Cost}</td>
+              <td>{prediction.predicted_expense_type}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
+      <h3>Expense Sums by Category</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Total Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {expenseSums.map((sum, index) => (
+            <tr key={index}>
+              <td>{sum.predicted_expense_type}</td>
+              <td>{sum.Cost}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
