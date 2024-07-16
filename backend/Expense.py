@@ -9,9 +9,14 @@ def clean_description(desc):
     return ' '.join(word for word in desc.split() if len(word) > 1)
 
 def process_expenses():
+    print("Starting expense processing")  # New logging
+    
     # Load the data
     data = pd.read_csv("training-data.csv")
     data2 = pd.read_csv("expenses.csv")
+
+    print(f"Loaded training data shape: {data.shape}")  # New logging
+    print(f"Loaded expenses data: {data2}")  # New logging
 
     # Data preprocessing
     data['Description'] = data['Description'].fillna('Unknown').apply(clean_description)
@@ -30,6 +35,7 @@ def process_expenses():
 
     print(f"X_train shape: {X_train.shape}")
     print(f"y_train shape: {y_train.shape}")
+    print(f"X_test shape: {X_test.shape}")  # New logging
 
     le = LabelEncoder()
     y_train_encoded = le.fit_transform(y_train)
@@ -47,6 +53,8 @@ def process_expenses():
     results['predicted_expense_type'] = le.inverse_transform(predictions)
     results.loc[results['is_payment'], 'predicted_expense_type'] = 'Payment'
 
+    print(f"Results after prediction: {results}")  # New logging
+
     # Separate expense sums for paid and owed
     expense_sums_paid = results[results['Net Amount'] > 0].groupby('predicted_expense_type')['Net Amount'].sum().reset_index()
     expense_sums_paid.columns = ['predicted_expense_type', 'Paid Amount']
@@ -56,6 +64,8 @@ def process_expenses():
 
     # Merge paid and owed sums
     expense_sums = pd.merge(expense_sums_paid, expense_sums_owed, on='predicted_expense_type', how='outer').fillna(0)
+
+    print(f"Expense sums: {expense_sums}")  # New logging
 
     results.to_csv("prediction.csv", index=False)
     expense_sums.to_csv("expense_sums.csv", index=False)

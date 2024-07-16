@@ -119,7 +119,7 @@ function Dashboard () {
                   <td>{formatINR(parseFloat(sum['Owed Amount']))}</td>
                 </tr>
               ))}
-            </tbody>
+            </tbody> 
           </table>
         </div>
       </section>

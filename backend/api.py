@@ -12,7 +12,13 @@ import traceback
 import json
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)  
+
+@app.route('/api/authorize', methods=['POST'])
+def authorize():
+    sObj = Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
+    url, secret = sObj.getAuthorizeURL()
+    return jsonify({'url': url, 'secret': secret})
 
 @app.route('/api/callback', methods=['POST'])
 def callback():
@@ -36,11 +42,21 @@ def callback():
         print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/authorize', methods=['POST'])
-def authorize():
-    sObj = Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
-    url, secret = sObj.getAuthorizeURL()
-    return jsonify({'url': url, 'secret': secret})
+@app.route('/api/fetch_data', methods=['POST'])
+def fetch_data():
+    try:
+        access_token = request.json.get('access_token')
+        if not access_token:
+            return jsonify({'error': 'No access token provided'}), 400
+        
+        sObj = Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
+        sObj.setAccessToken(access_token)
+        fetch_user_data(sObj)
+        return jsonify({'message': 'Data fetched successfully'})
+    except Exception as e:
+        print(f"Error fetching data: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/process_expenses', methods=['POST'])
 def process_expenses_api():
@@ -55,22 +71,6 @@ def process_expenses_api():
         return jsonify({'message': 'Expenses processed successfully'})
     except Exception as e:
         print(f"Error processing expenses: {str(e)}")
-        print(f"Stack trace: {traceback.format_exc()}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/fetch_data', methods=['POST'])
-def fetch_data():
-    try:
-        access_token = request.json.get('access_token')
-        if not access_token:
-            return jsonify({'error': 'No access token provided'}), 400
-        
-        sObj = Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
-        sObj.setAccessToken(access_token)
-        fetch_user_data(sObj)
-        return jsonify({'message': 'Data fetched successfully'})
-    except Exception as e:
-        print(f"Error fetching data: {str(e)}")
         print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
@@ -141,6 +141,7 @@ def add_expense():
         sObj.setAccessToken(access_token)
         
         expense_data = request.json
+        print(f"Received expense data: {expense_data}")  # New logging
 
         # Create a DataFrame for the new expense
         new_expense = pd.DataFrame([{
@@ -154,19 +155,23 @@ def add_expense():
             'category': expense_data['category']
         }])
         
+        print(f"New expense DataFrame: {new_expense}")  # New logging
+        
         # Append the new expense to the CSV file
         expenses_file = 'expenses.csv'
         try:
             # Load existing expenses
             expenses = pd.read_csv(expenses_file)
-            # Append new expense
-            expenses = expenses.append(new_expense, ignore_index=True)
+            print(f"Existing expenses: {expenses}")  # New logging
+            # Append new expense using concat
+            expenses = pd.concat([expenses, new_expense], ignore_index=True)
         except FileNotFoundError:
             # If the file doesn't exist, create it with the new expense
             expenses = new_expense
 
         # Save the updated expenses to the CSV file
         expenses.to_csv(expenses_file, index=False)
+        print(f"Updated expenses saved to {expenses_file}")  # New logging
         
         # Re-run expense processing
         process_expenses()
@@ -174,6 +179,7 @@ def add_expense():
         return jsonify({'message': 'Expense added successfully'}), 200
     except Exception as e:
         print(f"Error adding expense: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")  # New logging
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
