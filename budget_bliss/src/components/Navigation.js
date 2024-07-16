@@ -6,32 +6,34 @@ function Navigation () {
   const [user, setUser] = useState(null)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const accessTokenString = localStorage.getItem('access_token')
-      if (accessTokenString) {
-        try {
-          const accessToken = JSON.parse(accessTokenString)
-          console.log('Full access token object:', accessToken)
-          const response = await axios.get('/api/user_info', {
-            headers: { Authorization: `Bearer ${JSON.stringify(accessToken)}` }
-          })
-          console.log('User info response:', response.data)
-          setUser(response.data)
-        } catch (error) {
-          console.error(
-            'Error fetching user info:',
-            error.response ? error.response.data : error.message
-          )
-          console.error('Full error object:', error)
-          if (error.response && error.response.status === 401) {
-            handleLogout()
-          }
+  const fetchUserData = async () => {
+    const accessTokenString = localStorage.getItem('access_token')
+    if (accessTokenString) {
+      try {
+        const accessToken = JSON.parse(accessTokenString)
+        const response = await axios.get('/api/user_info', {
+          headers: { Authorization: `Bearer ${JSON.stringify(accessToken)}` }
+        })
+        setUser(response.data)
+      } catch (error) {
+        console.error('Error fetching user info:', error)
+        if (error.response && error.response.status === 401) {
+          handleLogout()
         }
       }
     }
+  }
 
+  useEffect(() => {
     fetchUserData()
+
+    // Add event listener for login state change
+    window.addEventListener('loginStateChange', fetchUserData)
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener('loginStateChange', fetchUserData)
+    }
   }, [])
 
   const handleLogout = () => {
@@ -39,6 +41,7 @@ function Navigation () {
     setUser(null)
     navigate('/')
   }
+
 
   return (
     <nav
