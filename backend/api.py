@@ -10,6 +10,12 @@ import uuid
 from flask_cors import CORS
 import traceback
 import json
+import matplotlib
+matplotlib.use('Agg')  # Use the 'Agg' backend for generating plots without a GUI
+import matplotlib.pyplot as plt
+import io
+import base64
+from flask import send_file
 
 app = Flask(__name__)
 CORS(app)  
@@ -90,6 +96,53 @@ def get_results():
     except Exception as e:
         print(f"Error getting results: {str(e)}")
         print(f"Stack trace: {traceback.format_exc()}")
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/plot/expense_distribution', methods=['GET'])
+def plot_expense_distribution():
+    try:
+        expense_sums = pd.read_csv('expense_sums.csv')
+        
+        # Create a bar plot
+        plt.figure(figsize=(10, 6))
+        plt.bar(expense_sums['predicted_expense_type'], expense_sums['Paid Amount'], label='Paid')
+        plt.bar(expense_sums['predicted_expense_type'], expense_sums['Owed Amount'], bottom=expense_sums['Paid Amount'], label='Owed')
+        plt.xlabel('Expense Type')
+        plt.ylabel('Amount (INR)')
+        plt.title('Expense Distribution')
+        plt.legend()
+        plt.xticks(rotation=45, ha='right')
+        
+        # Save the plot to a bytes buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        plt.close()
+        
+        return send_file(buf, mimetype='image/png')
+    except Exception as e:
+        print(f"Error generating expense distribution plot: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/plot/expense_pie_chart', methods=['GET'])
+def plot_expense_pie_chart():
+    try:
+        expense_sums = pd.read_csv('expense_sums.csv')
+        
+        # Create a pie chart
+        plt.figure(figsize=(8, 8))
+        plt.pie(expense_sums['Paid Amount'], labels=expense_sums['predicted_expense_type'], autopct='%1.1f%%')
+        plt.title('Expense Distribution (Paid Amount)')
+        
+        # Save the plot to a bytes buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        plt.close()
+        
+        return send_file(buf, mimetype='image/png')
+    except Exception as e:
+        print(f"Error generating expense pie chart: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/user_info', methods=['GET'])

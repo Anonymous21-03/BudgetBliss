@@ -1,3 +1,5 @@
+// src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -8,6 +10,7 @@ import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/Profile';
 import Expenses from './Pages/Expenses';
 import Homepage from './Pages/Homepage';
+import Visualizations from './Pages/Visualizations'; 
 
 function App() {
   return (
@@ -21,6 +24,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/expenses" element={<Expenses />} />
+          <Route path="/visualizations" element={<Visualizations />} /> {/* Add this new route */}
         </Routes>
       </div>
     </Router>

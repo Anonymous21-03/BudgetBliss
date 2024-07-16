@@ -60,6 +60,9 @@ function Navigation() {
             <Link to="/profile">Profile</Link>
           </li>
         )}
+        <li className={location.pathname === '/visualizations' ? 'active' : ''}>
+          <Link to="/visualizations">Visualizations</Link>
+        </li>
       </ul>
       <div className="nav-auth">
         {user ? (
