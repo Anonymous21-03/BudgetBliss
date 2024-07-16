@@ -1,0 +1,128 @@
+.expenses-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .expenses-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+  
+  .add-expense-section, .expense-list-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .add-expense-section h2, .expense-list-section h2 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+  }
+  
+  .add-expense-section form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .add-expense-section input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .add-expense-section button {
+    padding: 0.5rem 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .add-expense-section button:hover {
+    background-color: #45a049;
+  }
+  
+  .expense-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .expense-controls select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .expense-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .expense-item:last-child {
+    border-bottom: none;
+  }
+  
+  .expense-info h3 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .expense-info p {
+    margin: 0.5rem 0 0;
+    color: #666;
+  }
+  
+  .expense-amount {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  
+  .expenses-loading, .expenses-error, .expenses-login-prompt {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  .expenses-login-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .expenses-login-button:hover {
+    background-color: #45a049;
+  }
+  
+  @media (max-width: 600px) {
+    .add-expense-section form {
+      flex-direction: column;
+    }
+    
+    .expense-controls {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }

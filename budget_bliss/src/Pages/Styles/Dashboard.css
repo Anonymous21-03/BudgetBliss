@@ -1,0 +1,94 @@
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .dashboard-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-section {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-section h2 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+  }
+  
+  .dashboard-table-container {
+    overflow-x: auto;
+  }
+  
+  .dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .dashboard-table th,
+  .dashboard-table td {
+    text-align: left;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .dashboard-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .dashboard-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .dashboard-table tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .dashboard-loading,
+  .dashboard-error,
+  .dashboard-no-data,
+  .dashboard-login-prompt {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  .dashboard-login-prompt h2 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .dashboard-login-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .dashboard-login-button:hover {
+    background-color: #45a049;
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 1rem;
+    }
+  
+    .dashboard-table th,
+    .dashboard-table td {
+      padding: 0.5rem;
+    }
+  }

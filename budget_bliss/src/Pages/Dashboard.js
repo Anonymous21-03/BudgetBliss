@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import './Styles/Dashboard.css';
 
 function Dashboard() {
   const [data, setData] = useState(null);
@@ -12,7 +13,6 @@ function Dashboard() {
     const fetchData = async () => {
       const accessTokenString = localStorage.getItem('access_token');
       if (!accessTokenString) {
-        setError('No access token found. Please log in again.');
         setLoading(false);
         return;
       }
@@ -34,9 +34,26 @@ function Dashboard() {
     fetchData();
   }, [navigate]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!data) return <div>No data available</div>;
+  const formatINR = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  if (loading) return <div className="dashboard-loading">Loading...</div>;
+  if (error) return <div className="dashboard-error">Error: {error}</div>;
+  if (!localStorage.getItem('access_token')) {
+    return (
+      <div className="dashboard-login-prompt">
+        <h2>Please log in to view your dashboard</h2>
+        <Link to="/login" className="dashboard-login-button">Log In</Link>
+      </div>
+    );
+  }
+  if (!data) return <div className="dashboard-no-data">No data available</div>;
 
   const predictions = JSON.parse(data.predictions);
   const expenseSums = JSON.parse(data.expense_sums);
@@ -45,46 +62,54 @@ function Dashboard() {
   const displayedPredictions = predictions.slice(0, 10);
 
   return (
-    <div>
-      <h2>Your Splitwise Dashboard</h2>
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">Your Splitwise Dashboard</h1>
       
-      <h3>Recent Expense Predictions</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Cost</th>
-            <th>Predicted Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {displayedPredictions.map((prediction, index) => (
-            <tr key={index}>
-              <td>{prediction.Description}</td>
-              <td>{prediction.Cost}</td>
-              <td>{prediction.predicted_expense_type}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <section className="dashboard-section">
+        <h2>Recent Expense Predictions</h2>
+        <div className="dashboard-table-container">
+          <table className="dashboard-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Cost</th>
+                <th>Predicted Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayedPredictions.map((prediction, index) => (
+                <tr key={index}>
+                  <td>{prediction.Description}</td>
+                  <td>{formatINR(parseFloat(prediction.Cost))}</td>
+                  <td>{prediction.predicted_expense_type}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
       
-      <h3>Expense Sums by Category</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Total Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenseSums.map((sum, index) => (
-            <tr key={index}>
-              <td>{sum.predicted_expense_type}</td>
-              <td>{sum.Cost}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <section className="dashboard-section">
+        <h2>Expense Sums by Category</h2>
+        <div className="dashboard-table-container">
+          <table className="dashboard-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Total Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {expenseSums.map((sum, index) => (
+                <tr key={index}>
+                  <td>{sum.predicted_expense_type}</td>
+                  <td>{formatINR(parseFloat(sum.Cost))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }
