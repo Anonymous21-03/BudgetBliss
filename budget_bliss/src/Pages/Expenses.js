@@ -24,10 +24,16 @@ function Expenses() {
 
     try {
       const accessToken = JSON.parse(accessTokenString);
-      const response = await axios.get('/api/expenses', {
+      const response = await axios.get('/api/get_results', {
         headers: { Authorization: `Bearer ${JSON.stringify(accessToken)}` }
       });
-      setExpenses(response.data);
+      const predictions = JSON.parse(response.data.predictions);
+      setExpenses(predictions.map(p => ({
+        description: p.Description || 'Unknown',
+        amount: parseFloat(p['Total Cost']) || 0,
+        category: p.predicted_expense_type || 'Unknown',
+        date: p.Date || new Date().toISOString()
+      })));
       setLoading(false);
     } catch (error) {
       console.error('Error fetching expenses:', error);
@@ -38,15 +44,24 @@ function Expenses() {
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
-    // Implement the API call to add a new expense
-    console.log('Adding expense:', newExpense);
-    // After adding, refresh the expenses list
-    fetchExpenses();
-    setNewExpense({ description: '', amount: '', category: '' });
+    const accessTokenString = localStorage.getItem('access_token');
+    if (!accessTokenString) return;
+
+    try {
+      const accessToken = JSON.parse(accessTokenString);
+      await axios.post('/api/add_expense', newExpense, {
+        headers: { Authorization: `Bearer ${JSON.stringify(accessToken)}` }
+      });
+      fetchExpenses(); // Refresh the expense list
+      setNewExpense({ description: '', amount: '', category: '' });
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      setError('Failed to add expense. Please try again.');
+    }
   };
 
   const filteredExpenses = expenses.filter(expense => 
-    filter === 'all' || expense.category === filter
+    filter === 'all' || expense.category.toLowerCase() === filter
   );
 
   const sortedExpenses = filteredExpenses.sort((a, b) => {
@@ -112,9 +127,9 @@ function Expenses() {
           <select onChange={(e) => setFilter(e.target.value)}>
             <option value="all">All Categories</option>
             <option value="food">Food</option>
-            <option value="transport">Transport</option>
+            <option value="transportation">Transportation</option>
             <option value="utilities">Utilities</option>
-            {/* Add more categories as needed */}
+            <option value="payment">Payment</option>
           </select>
           <select onChange={(e) => setSort(e.target.value)}>
             <option value="date">Sort by Date</option>

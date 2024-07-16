@@ -4,7 +4,6 @@ import csv
 from datetime import datetime
 import os
 
-
 def get_splitwise_instance():
     return Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
 
@@ -19,7 +18,6 @@ def authorize_user(sObj):
     
     access_token = sObj.getAccessToken(oauth_token, secret, oauth_verifier)
     return access_token
-
 
 def fetch_user_data(sObj):
     current_user = sObj.getCurrentUser()
@@ -52,6 +50,8 @@ def fetch_user_data(sObj):
         if len(expenses) < limit:
             break
 
+    current_user_id = current_user.getId()
+
     expense_data = []
     for expense in all_expenses:
         created_by = "Unknown"
@@ -60,21 +60,28 @@ def fetch_user_data(sObj):
             last_name = expense.getCreatedBy().getLastName() or ""
             created_by = f"{first_name} {last_name}".strip() or "Unknown"
         
+        # Calculate net amount for the current user
+        net_amount = 0
+        for user in expense.getUsers():
+            if user.getId() == current_user_id:
+                net_amount = user.getNetBalance()
+                break
+        
         expense_data.append([
             expense.getId(),
             expense.getDescription(),
             expense.getCost(),
+            net_amount,  # Add net amount
             expense.getCurrencyCode(),
             expense.getDate(),
             created_by
         ])
-    update_csv('expenses.csv', ['Expense ID', 'Description', 'Cost', 'Currency Code', 'Date', 'Created By'], expense_data)
+    update_csv('expenses.csv', ['Expense ID', 'Description', 'Total Cost', 'Net Amount', 'Currency Code', 'Date', 'Created By'], expense_data)
 
     print(f"\nSummary:")
     print(f"Total number of friends: {len(friends)}")
     print(f"Total number of groups: {len(groups)}")
     print(f"Total number of expenses: {len(all_expenses)}")
-
 
 def main():
     sObj = get_splitwise_instance()

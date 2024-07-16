@@ -65,14 +65,14 @@ function Profile() {
       </div>
       <div className="profile-stats">
         <h3>Your Splitwise Stats</h3>
-        <p>Total Expenses: $X,XXX.XX</p>
+        <p>Total Expenses: ₹X,XXX.XX</p>
         <p>Groups: X</p>
         <p>Friends: X</p>
         {/* Add more stats as needed */}
       </div>
       <div className="profile-settings">
         <h3>Settings</h3>
-        <p>Currency Preference: USD</p>
+        <p>Currency Preference: INR</p>
         <p>Notification Preferences: Email, Push</p>
         {/* Add more settings or make these editable */}
       </div>

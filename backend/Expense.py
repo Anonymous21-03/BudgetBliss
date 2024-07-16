@@ -5,17 +5,23 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
 
+def clean_description(desc):
+    return ' '.join(word for word in desc.split() if len(word) > 1)
+
 def process_expenses():
     # Load the data
     data = pd.read_csv("training-data.csv")
     data2 = pd.read_csv("expenses.csv")
 
     # Data preprocessing
-    data['Description'] = data['Description'].fillna('Unknown')
-    data2['Description'] = data2['Description'].fillna('Unknown')
+    data['Description'] = data['Description'].fillna('Unknown').apply(clean_description)
+    data2['Description'] = data2['Description'].fillna('Unknown').apply(clean_description)
 
-    data['Cost'] = pd.to_numeric(data['Cost'], errors='coerce')
-    data2['Cost'] = pd.to_numeric(data2['Cost'], errors='coerce')
+    data['Cost'] = pd.to_numeric(data['Cost'], errors='coerce').fillna(0)
+    data2['Total Cost'] = pd.to_numeric(data2['Total Cost'], errors='coerce').fillna(0)
+    data2['Net Amount'] = pd.to_numeric(data2['Net Amount'], errors='coerce').fillna(0)
+
+    data2['is_payment'] = data2['Description'].str.lower().isin(['payment', 'settle all balances'])
 
     X_train = data['Description']
     y_train = data['expense_type']
@@ -39,8 +45,17 @@ def process_expenses():
 
     results = data2.copy()
     results['predicted_expense_type'] = le.inverse_transform(predictions)
+    results.loc[results['is_payment'], 'predicted_expense_type'] = 'Payment'
 
-    expense_sums = results.groupby('predicted_expense_type')['Cost'].sum().reset_index()
+    # Separate expense sums for paid and owed
+    expense_sums_paid = results[results['Net Amount'] > 0].groupby('predicted_expense_type')['Net Amount'].sum().reset_index()
+    expense_sums_paid.columns = ['predicted_expense_type', 'Paid Amount']
+    
+    expense_sums_owed = results[results['Net Amount'] < 0].groupby('predicted_expense_type')['Net Amount'].sum().abs().reset_index()
+    expense_sums_owed.columns = ['predicted_expense_type', 'Owed Amount']
+
+    # Merge paid and owed sums
+    expense_sums = pd.merge(expense_sums_paid, expense_sums_owed, on='predicted_expense_type', how='outer').fillna(0)
 
     results.to_csv("prediction.csv", index=False)
     expense_sums.to_csv("expense_sums.csv", index=False)

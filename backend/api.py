@@ -5,7 +5,11 @@ import config
 from main import fetch_user_data
 from Expense import process_expenses
 import os
+from datetime import datetime
+import uuid
 from flask_cors import CORS
+import traceback
+import json
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -29,6 +33,7 @@ def callback():
         return jsonify({'access_token': access_token})
     except Exception as e:
         print(f"Error in callback: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/authorize', methods=['POST'])
@@ -50,6 +55,7 @@ def process_expenses_api():
         return jsonify({'message': 'Expenses processed successfully'})
     except Exception as e:
         print(f"Error processing expenses: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/fetch_data', methods=['POST'])
@@ -65,6 +71,7 @@ def fetch_data():
         return jsonify({'message': 'Data fetched successfully'})
     except Exception as e:
         print(f"Error fetching data: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/get_results', methods=['GET'])
@@ -82,8 +89,8 @@ def get_results():
         })
     except Exception as e:
         print(f"Error getting results: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
-import json
 
 @app.route('/api/user_info', methods=['GET'])
 def get_user_info():
@@ -117,6 +124,56 @@ def get_user_info():
         return jsonify({'error': 'Invalid access token format'}), 400
     except Exception as e:
         print(f"Error getting user info: {str(e)}")
+        print(f"Stack trace: {traceback.format_exc()}")
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/add_expense', methods=['POST'])
+def add_expense():
+    access_token = request.headers.get('Authorization')
+    if not access_token:
+        return jsonify({'error': 'No access token provided'}), 401
+    
+    access_token = access_token.split(' ')[1]  # Remove 'Bearer ' prefix
+    
+    try:
+        access_token = json.loads(access_token)
+        sObj = Splitwise(config.CONSUMER_KEY, config.CONSUMER_SECRET)
+        sObj.setAccessToken(access_token)
+        
+        expense_data = request.json
+
+        # Create a DataFrame for the new expense
+        new_expense = pd.DataFrame([{
+            'id': str(uuid.uuid4()),  # Generate a unique ID
+            'description': expense_data['description'],
+            'amount': expense_data['amount'],
+            'net_amount': expense_data['amount'],  # Net amount same as total for simplicity
+            'currency': 'INR',  # Assuming all expenses are in INR
+            'date': datetime.now().isoformat(),
+            'created_by': 'User',  # Placeholder for created by
+            'category': expense_data['category']
+        }])
+        
+        # Append the new expense to the CSV file
+        expenses_file = 'expenses.csv'
+        try:
+            # Load existing expenses
+            expenses = pd.read_csv(expenses_file)
+            # Append new expense
+            expenses = expenses.append(new_expense, ignore_index=True)
+        except FileNotFoundError:
+            # If the file doesn't exist, create it with the new expense
+            expenses = new_expense
+
+        # Save the updated expenses to the CSV file
+        expenses.to_csv(expenses_file, index=False)
+        
+        # Re-run expense processing
+        process_expenses()
+        
+        return jsonify({'message': 'Expense added successfully'}), 200
+    except Exception as e:
+        print(f"Error adding expense: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
