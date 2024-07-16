@@ -1,0 +1,135 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .homepage-container {
+    min-height: 100vh;
+    width: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  .hero-section {
+    height: 90vh;
+    width: 100%;
+    background-color: #b0fffa;
+    display: flex;
+    align-items: center;
+    padding: 0 5%;
+  }
+  
+  .headline {
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
+  
+  .heading-text, .heading-image {
+    width: 50%;
+  }
+  
+  .heading-text h1 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .subheading {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 2rem;
+  }
+  
+  .login-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+  }
+  
+  .login-button:hover {
+    background-color: #45a049;
+  }
+  
+  .features-section {
+    padding: 5% 10%;
+    background-color: #f9f9f9;
+  }
+  
+  .features-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+  
+  .feature-item {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feature-item h3 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+  
+  .how-it-works {
+    padding: 5% 10%;
+    background-color: #e9f7ff;
+  }
+  
+  .how-it-works h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .steps {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  
+  .step {
+    text-align: center;
+    width: 200px;
+    margin-bottom: 1rem;
+  }
+  
+  .step-number {
+    width: 40px;
+    height: 40px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    .headline {
+      flex-direction: column;
+    }
+    
+    .heading-text, .heading-image {
+      width: 100%;
+    }
+    
+    .heading-image {
+      margin-top: 2rem;
+    }
+  }

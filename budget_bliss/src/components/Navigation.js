@@ -1,90 +1,85 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import './Navigation.css'; // We'll create this file for styles
 
-function Navigation () {
-  const [user, setUser] = useState(null)
-  const navigate = useNavigate()
+function Navigation() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const fetchUserData = async () => {
-    const accessTokenString = localStorage.getItem('access_token')
+    const accessTokenString = localStorage.getItem('access_token');
     if (accessTokenString) {
       try {
-        const accessToken = JSON.parse(accessTokenString)
+        const accessToken = JSON.parse(accessTokenString);
         const response = await axios.get('/api/user_info', {
           headers: { Authorization: `Bearer ${JSON.stringify(accessToken)}` }
-        })
-        setUser(response.data)
+        });
+        setUser(response.data);
       } catch (error) {
-        console.error('Error fetching user info:', error)
+        console.error('Error fetching user info:', error);
         if (error.response && error.response.status === 401) {
-          handleLogout()
+          handleLogout();
         }
       }
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUserData()
-
-    // Add event listener for login state change
-    window.addEventListener('loginStateChange', fetchUserData)
-
-    // Cleanup function
+    fetchUserData();
+    window.addEventListener('loginStateChange', fetchUserData);
     return () => {
-      window.removeEventListener('loginStateChange', fetchUserData)
-    }
-  }, [])
+      window.removeEventListener('loginStateChange', fetchUserData);
+    };
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
-    setUser(null)
-    navigate('/')
-  }
-
+    localStorage.removeItem('access_token');
+    setUser(null);
+    navigate('/');
+  };
 
   return (
-    <nav
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '10px'
-      }}
-    >
-      <ul
-        style={{ listStyle: 'none', display: 'flex', gap: '20px', margin: 0 }}
-      >
-        <li>
-          <Link to='/'>Home</Link>
+    <nav className="navigation">
+      <div className="nav-logo">
+        <Link to="/">ExpenseAI</Link>
+      </div>
+      <ul className="nav-links">
+        <li className={location.pathname === '/' ? 'active' : ''}>
+          <Link to="/">Home</Link>
         </li>
-        <li>
-          <Link to='/dashboard'>Dashboard</Link>
+        <li className={location.pathname === '/dashboard' ? 'active' : ''}>
+          <Link to="/dashboard">Dashboard</Link>
         </li>
-        <li>
-          <Link to='/profile'>Profile</Link>
+        <li className={location.pathname === '/expenses' ? 'active' : ''}>
+          <Link to="/expenses">Expenses</Link>
         </li>
-        <li>
-          <Link to='/expenses'>Expenses</Link>
-        </li>
+        {user && (
+          <li className={location.pathname === '/profile' ? 'active' : ''}>
+            <Link to="/profile">Profile</Link>
+          </li>
+        )}
       </ul>
-      {user ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {user.picture && (
-            <img
-              src={user.picture}
-              alt='User'
-              style={{ width: '30px', height: '30px', borderRadius: '50%' }}
-            />
-          )}
-          <span>{user.name}</span>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      ) : (
-        <Link to='/'>Login</Link>
-      )}
+      <div className="nav-auth">
+        {user ? (
+          <div className="user-info">
+            {user.picture && (
+              <img
+                src={user.picture}
+                alt="User"
+                className="user-avatar"
+              />
+            )}
+            <span className="user-name">{user.name}</span>
+            <button onClick={handleLogout} className="logout-button">Logout</button>
+          </div>
+        ) : (
+          <Link to="/login" className="login-button">Login</Link>
+        )}
+      </div>
     </nav>
-  )
+  );
 }
 
-export default Navigation
+export default Navigation;

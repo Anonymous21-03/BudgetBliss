@@ -7,6 +7,7 @@ import Callback from './Pages/Callback';
 import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/Profile';
 import Expenses from './Pages/Expenses';
+import Homepage from './Pages/Homepage';
 
 function App() {
   return (
@@ -14,7 +15,8 @@ function App() {
       <div className="App">
         <Navigation />
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Homepage />} />
           <Route path="/callback" element={<Callback />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
