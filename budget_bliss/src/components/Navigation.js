@@ -43,7 +43,7 @@ function Navigation() {
   return (
     <nav className="navigation">
       <div className="nav-logo">
-        <Link to="/">ExpenseAI</Link>
+        <Link to="/">Budget Bliss</Link>
       </div>
       <ul className="nav-links">
         <li className={location.pathname === '/' ? 'active' : ''}>
