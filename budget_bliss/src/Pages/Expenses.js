@@ -10,6 +10,8 @@ function Expenses() {
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('date');
   const [newExpense, setNewExpense] = useState({ description: '', amount: '', category: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expensesPerPage] = useState(10);
 
   useEffect(() => {
     fetchExpenses();
@@ -70,12 +72,54 @@ function Expenses() {
     return 0;
   });
 
+  const indexOfLastExpense = currentPage * expensesPerPage;
+  const indexOfFirstExpense = indexOfLastExpense - expensesPerPage;
+  const currentExpenses = sortedExpenses.slice(indexOfFirstExpense, indexOfLastExpense);
+
   const formatINR = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 2,
     }).format(amount);
+  };
+
+  const getPageRange = (currentPage, totalPages) => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+        range.push(i);
+      }
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  };
+
+  const goToPage = (page) => {
+    const totalPages = Math.ceil(sortedExpenses.length / expensesPerPage);
+    if (page < 1) {
+      setCurrentPage(1);
+    } else if (page > totalPages) {
+      setCurrentPage(totalPages);
+    } else {
+      setCurrentPage(page);
+    }
   };
 
   if (loading) return <div className="expenses-loading">Loading...</div>;
@@ -137,7 +181,7 @@ function Expenses() {
           </select>
         </div>
         <ul className="expense-list">
-          {sortedExpenses.map((expense, index) => (
+          {currentExpenses.map((expense, index) => (
             <li key={index} className="expense-item">
               <div className="expense-info">
                 <h3>{expense.description}</h3>
@@ -150,6 +194,39 @@ function Expenses() {
             </li>
           ))}
         </ul>
+        <div className="pagination">
+          <button onClick={() => goToPage(1)} disabled={currentPage === 1}>
+            &laquo; First
+          </button>
+          <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
+            &lsaquo; Previous
+          </button>
+          {getPageRange(currentPage, Math.ceil(sortedExpenses.length / expensesPerPage)).map((page, index) => (
+            page === '...' ? (
+              <span key={index} className="pagination-ellipsis">...</span>
+            ) : (
+              <button 
+                key={index} 
+                onClick={() => goToPage(page)} 
+                className={currentPage === page ? 'active' : ''}
+              >
+                {page}
+              </button>
+            )
+          ))}
+          <button 
+            onClick={() => goToPage(currentPage + 1)} 
+            disabled={currentPage === Math.ceil(sortedExpenses.length / expensesPerPage)}
+          >
+            Next &rsaquo;
+          </button>
+          <button 
+            onClick={() => goToPage(Math.ceil(sortedExpenses.length / expensesPerPage))} 
+            disabled={currentPage === Math.ceil(sortedExpenses.length / expensesPerPage)}
+          >
+            Last &raquo;
+          </button>
+        </div>
       </section>
     </div>
   );

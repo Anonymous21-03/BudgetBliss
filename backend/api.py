@@ -194,7 +194,37 @@ def add_expense():
         sObj.setAccessToken(access_token)
         
         expense_data = request.json
-        print(f"Received expense data: {expense_data}")  # New logging
+        print(f"Received expense data: {expense_data}")
+
+        # Fetch latest expenses from Splitwise
+        all_expenses = []
+        offset = 0
+        limit = 100
+        while True:
+            expenses = sObj.getExpenses(limit=limit, offset=offset)
+            if not expenses:
+                break
+            all_expenses.extend(expenses)
+            offset += limit
+            if len(expenses) < limit:
+                break
+
+        # Convert Splitwise expenses to DataFrame, filtering out deleted expenses
+        expenses = pd.DataFrame([
+            {
+                'id': expense.getId(),
+                'description': expense.getDescription(),
+                'amount': expense.getCost(),
+                'net_amount': expense.getCost(),  # Simplified; you might want to calculate this based on user's share
+                'currency': expense.getCurrencyCode(),
+                'date': expense.getDate(),
+                'created_by': expense.getCreatedBy().getFirstName() if expense.getCreatedBy() else 'Unknown',
+                'category': expense.getCategory().getName() if expense.getCategory() else 'Uncategorized',
+                'deleted_at': expense.getDeletedAt()
+            }
+            for expense in all_expenses
+            if expense.getDeletedAt() is None  # Only include expenses that haven't been deleted
+        ])
 
         # Create a DataFrame for the new expense
         new_expense = pd.DataFrame([{
@@ -205,26 +235,17 @@ def add_expense():
             'currency': 'INR',  # Assuming all expenses are in INR
             'date': datetime.now().isoformat(),
             'created_by': 'User',  # Placeholder for created by
-            'category': expense_data['category']
+            'category': expense_data['category'],
+            'deleted_at': None
         }])
         
-        print(f"New expense DataFrame: {new_expense}")  # New logging
-        
-        # Append the new expense to the CSV file
-        expenses_file = 'expenses.csv'
-        try:
-            # Load existing expenses
-            expenses = pd.read_csv(expenses_file)
-            print(f"Existing expenses: {expenses}")  # New logging
-            # Append new expense using concat
-            expenses = pd.concat([expenses, new_expense], ignore_index=True)
-        except FileNotFoundError:
-            # If the file doesn't exist, create it with the new expense
-            expenses = new_expense
+        # Append new expense to the fetched expenses
+        expenses = pd.concat([expenses, new_expense], ignore_index=True)
 
-        # Save the updated expenses to the CSV file
+        # Save the updated expenses to the CSV file (overwriting)
+        expenses_file = 'expenses.csv'
         expenses.to_csv(expenses_file, index=False)
-        print(f"Updated expenses saved to {expenses_file}")  # New logging
+        print(f"Updated expenses saved to {expenses_file}")
         
         # Re-run expense processing
         process_expenses()
@@ -232,8 +253,7 @@ def add_expense():
         return jsonify({'message': 'Expense added successfully'}), 200
     except Exception as e:
         print(f"Error adding expense: {str(e)}")
-        print(f"Stack trace: {traceback.format_exc()}")  # New logging
+        print(f"Stack trace: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True)

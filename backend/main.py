@@ -63,7 +63,7 @@ def fetch_user_data(sObj):
         # Calculate net amount for the current user
         net_amount = 0
         for user in expense.getUsers():
-            if user.getId() == current_user_id:
+            if user.getId() == current_user.getId():
                 net_amount = user.getNetBalance()
                 break
         
@@ -71,12 +71,13 @@ def fetch_user_data(sObj):
             expense.getId(),
             expense.getDescription(),
             expense.getCost(),
-            net_amount,  # Add net amount
+            net_amount,
             expense.getCurrencyCode(),
             expense.getDate(),
-            created_by
+            created_by,
+            expense.getDeletedAt()  # Add this line to include deleted_at information
         ])
-    update_csv('expenses.csv', ['Expense ID', 'Description', 'Total Cost', 'Net Amount', 'Currency Code', 'Date', 'Created By'], expense_data)
+    update_csv('expenses.csv', ['Expense ID', 'Description', 'Total Cost', 'Net Amount', 'Currency Code', 'Date', 'Created By', 'Deleted At'], expense_data)
 
     print(f"\nSummary:")
     print(f"Total number of friends: {len(friends)}")

@@ -9,11 +9,19 @@ def clean_description(desc):
     return ' '.join(word for word in desc.split() if len(word) > 1)
 
 def process_expenses():
-    print("Starting expense processing")  # New logging
+    print("Starting expense processing")
     
     # Load the data
     data = pd.read_csv("training-data.csv")
     data2 = pd.read_csv("expenses.csv")
+
+    # Filter out deleted expenses if 'Deleted At' column exists
+    if 'Deleted At' in data2.columns:
+        data2 = data2[data2['Deleted At'].isna()]
+    else:
+        print("Warning: 'Deleted At' column not found in expenses.csv")
+
+
 
     print(f"Loaded training data shape: {data.shape}")  # New logging
     print(f"Loaded expenses data: {data2}")  # New logging
